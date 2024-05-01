@@ -1,6 +1,4 @@
-show databases;
-create database learndb;
-use test;
+
 
 create table students (sid int, Sname char(30), age int, course char(20));
 
@@ -8,191 +6,23 @@ insert into students values (1, "Ram", 27, "MySql");
 insert into students values (2, "Siri", 32, "Mysql");
 select * from students;
 desc students;
-create table patients (Pid int, Pname varchar(30), DOB Date, TOA datetime);
-insert into patients values (1, "XYZ", "1996-09-12", "2023-08-30 10:11:00");
-insert into patients values (2, "ABC", "1995-08-05", now());
-select * from patients;
 
-select year(dob) from patients;
-select monthname(dob) from patients;
-select now();
-select 2+3;
-select 2>3;
-select 3>2 as Result ;
-select 2+3 as Total;
-select 2 = null as Result;
-select 2 is null as Result; 
-select 2 is not null as Result;
--- DDL
--- Alter 
-desc students;
-alter table students add column mark int;
-alter table students drop column mark;
-alter table students modify COURSE varchar(50);
-alter table students change sid std_id int;
-alter table students rename Mystudents;
-desc mystudents;
-select * from mystudents;
--- Rename
-Rename table mystudents to students;
--- Drop
-create table sample (test varchar(16383));
-
-drop table sample;
--- DML
--- Insert
-select * from students;
-insert into students (sid, sname, marks) values (3, "John", 80);
-insert into students values (5, "Arpitha", 21, "DA", 50), (6, "Siri",22, "DA", 60);
--- Update
-set sql_safe_updates = 0;
-Update students set sname = "Ramesh" where sid = 1;
-update students set age = 25 where age= 27;
-select * from students;
-update students set MARKS = 80 where sname = "siri" and course = "DA";
-update students set MARKS = 90, course = "Statistics" where sid = 4;
-update students set course = "MySql";
--- Delete
-delete from students where sId = 6;
-select * from student;
-delete from students where marks = 90;
-delete from students;
-truncate table students;
--- DQL
-select * from myemp;
-select * from myemp limit 5;
-select * from myemp limit 101,5;
-select emp_id, first_name, last_name, salary from myemp;
-select emp_id, first_name, last_name, salary, salary * 0.2 as Bonus from myemp;
-select emp_id, first_name, last_name, salary + salary * 0.2 as Total_Salary from myemp;
-select emp_id, first_name, last_name, round(salary + salary * 0.2, 1) as Total_Salary from myemp;
--- Distinct
-select distinct(dep_id) from myemp;
-select distinct(mgr_id) from myemp;
-select distinct dep_id, mgr_id from myemp;
--- Order by
-select distinct(dep_id) from myemp order by dep_id desc;
-select distinct dep_id, mgr_id from myemp order by dep_id;
-select distinct dep_id, mgr_id from myemp order by dep_id, mgr_id;
-select dep_id,mgr_id from myemp order by dep_id,mgr_id;
--- Order the data based on salary column in desending and choose only emp_id, firstname, lastname & salary columns
-select emp_id, first_name, last_name, salary from myemp order by salary desc;
--- Operetors
-select * from myemp where dep_id = 80;
-select * from myemp where salary > 10000;
-select * from myemp where salary > 10000 order by salary desc;
-select * from myemp where dep_id != 80;
--- employees data who are having their hire year greater than 1995
-select * from myemp where Year(hire_date) > 1995 order by year(hire_date);
-select * from students;
-insert into students values (4,Null, "Mysql",60);
-
-select *,ifnull(sname, "Empty") as Sname from students;
-select * from students where sname is null;
-select * from myemp order by salary desc;
-select * from myemp order by salary desc limit 1,2;
--- Like
-select * from myemp where first_name like "a%";
-select * from myemp where first_name like "%a";
-select * from myemp where first_name like "%a%";
-select * from myemp where first_name like "J____";
-select * from myemp where first_name Not like "J____";
--- And
-select * from myemp where dep_id = 80 and salary > 10000;
--- OR
-select * from myemp where dep_id = 50 or dep_id = 60;
-select * from myemp where dep_id = 50 or dep_id = 60 or dep_id = 70;
--- IN
-select * from myemp where dep_id in (10,20,30,40,50);
-select * from myemp where dep_id not in (10,20,30,40,50);
-select * from myemp where dep_id not in (10,20,30,40,50) order by dep_id;
-select * from myemp where dep_id = 50 and first_name like "a%";
--- Between
-select * from myemp where salary between 5000 and 10000;
--- Fetch the employees data who is hired after 1996 and salary in between 5000 and 10000
-select * from myemp where year(hire_date) > 1996 and salary between 5000 and 10000 order by year(hire_date);
--- Case
-select emp_id, first_name, last_name,
-case
-when job_id = "ad_pres" then "President"
-when job_id = "ad_vp" then "Vice President"
-when job_id = "it_prog" then "Programmers"
-else "Employee"
-end as JobTitle from myemp;
-drop table student_name;
-create table student_name (first_name varchar(20));
-insert into student_name values ("Ram"), ("TOM"), ("JOHN"), ("HARRY");
-alter table student_name add column last_name varchar(20);
-insert into student_name (last_name) values ("Santosh"), ("Siri"), ("Arpitha"), ("Jyothi");
-select * from student_name;
-select ifnull(first_name, "Empty") as Names from student_name;
-select ifnull(first_name, "Empty") as Names from student_name;
-select coalesce(first_name,null,last_name, null) as names from student_name;
-select coalesce(null, null, "Hi", null);
-select coalesce(null, null, "Hi", "Hello");
--- Aggregate 
-select sum(salary) from myemp;
-select avg(salary), min(salary), max(salary) from myemp;
-select first_name, avg(salary) from myemp; -- Error Code
-select * from myemp;
-select count(*) from myemp;
 -- Count of employees whose salary greater than 10000
+
 select count(*) from myemp where salary > 10000;
+
 -- Count of employees who belongs to dep_id = 50
+
 select count(*) as count from myemp where dep_id = 50;
--- Group by
-select dep_id, avg(salary) from myemp group by dep_id;
-select dep_id, avg(salary) from myemp group by dep_id order by dep_id;
-select dep_id, min(salary) from myemp group by dep_id;
-select dep_id, avg(salary) from myemp where dep_id in (10,20) group by dep_id;
-select dep_id, avg(salary) from myemp group by dep_id having dep_id in (10,20);
-select dep_id, mgr_id, round(avg(salary),2)as Avg_Salary from myemp group by dep_id,mgr_id order by dep_id;
+
 -- Count how many emploees are there dep_id wise
 select dep_id, count(*) as Total_count from myemp group by dep_id order by dep_id;
+
 -- Count how many employees are there whose salary greater than 12000, dep_id wise
 select dep_id, count(*) as Total_count from myemp where salary > 10000 group by dep_id order by count(*) desc;
--- Constraints
-drop table students;
-create table students (sid int unique ,
-                       sname varchar(30) not null ,
-                       age int check(age >21),
-                       course varchar(20) default "MySql");
-desc students;
-show create table students;
-insert into students (sid, sname, age) values (1, "Tom", 25);
-select * from students;
-insert into students (sid,sname, age) values (2,null, 22); -- Error for violating not null constraint
-insert into students (sid,sname, age) values (2,"John", 20); -- Error for violating check constraint
-drop table students;
- create table students (sid int, sname varchar(30), age int, course varchar(30));
- desc students;
-alter table students modify column sid int unique not null;
-alter table students modify column sname varchar(30) not null;
-delete from authors where authorid = 1;
-update authors set authorid = 80 where authorid = 8;
--- Auto_increment
-drop table students;
-create table students (sid int primary key auto_increment, 
-                       sname varchar(30), 
-                       age int, 
-                       course varchar(30));
-insert into students (sname, age, course) values ("Tom", 27, "MySql"), ("John", 28, "Mysql");
-select * from students;
-alter table students auto_increment = 100;
-insert into students (sname, age, course) values ("Tom", 27, "MySql"), ("John", 28, "Mysql");
-select * from students;
-delete from students;
-insert into students (sname, age, course) values ("Tom", 27, "MySql"), ("John", 28, "Mysql");
-select * from students;
-truncate table students;
-insert into students (sname, age, course) values ("Tom", 27, "MySql"), ("John", 28, "Mysql");
-select * from students;
-select First_name, char_length(first_name) as charther_Length from myemp;
-select * from students;
-select replace('tom', "t", "d");
-select concat(first_name," ",last_name) as full_name from myemp;
-select * from myemp;
-select  replace(first_name,'Neena','leela') as first_name from myemp ;
+
+
+
 -- Inner Join
 select * from movies;
 select * from members;
