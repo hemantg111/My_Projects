@@ -1,26 +1,4 @@
 
-
-create table students (sid int, Sname char(30), age int, course char(20));
-
-insert into students values (1, "Ram", 27, "MySql");
-insert into students values (2, "Siri", 32, "Mysql");
-select * from students;
-desc students;
-
--- Count of employees whose salary greater than 10000
-
-select count(*) from myemp where salary > 10000;
-
--- Count of employees who belongs to dep_id = 50
-
-select count(*) as count from myemp where dep_id = 50;
-
--- Count how many emploees are there dep_id wise
-select dep_id, count(*) as Total_count from myemp group by dep_id order by dep_id;
-
--- Count how many employees are there whose salary greater than 12000, dep_id wise
-select dep_id, count(*) as Total_count from myemp where salary > 10000 group by dep_id order by count(*) desc;
-
 -- Show customer number, customer name, state and credit limit from customers table for below conditions. Sort the results by highest to lowest values of creditLimit.
 State should not contain null values
 credit limit should be between 50000 and 100000
