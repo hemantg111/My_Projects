@@ -10,14 +10,14 @@ where state is not null and creditLimit between 50000 and 100000
  order by creditLimit desc;
 
 -- Show the unique productline values containing the word cars at the end from products table.
+   Table- Productline
 
-select * from productlines;
-select distinct productLine from productlines where productLine like '%Cars';
+## Code- select distinct productLine from productlines where productLine like '%Cars';
 
 
 -- Show the orderNumber, status and comments from orders table for shipped status only. If some comments are having null values then show them as “-“.
 
-   select orderNumber, status, ifnull(comments, '-') as comments from orders;
+   ## CODE- select orderNumber, status, ifnull(comments, '-') as comments from orders;
 
 
 -- Select employee number, first name, job title and job title abbreviation from employees table based on following conditions.
@@ -26,79 +26,42 @@ select distinct productLine from productlines where productLine like '%Cars';
    Sales Manager / Sale Manager then “SM”
    Sales Rep then “SR”
    Containing VP word then “VP”.
+-- Table- employees
 
-select * from employees;
-select employeeNumber, firstName, jobTitle,
-case
-when jobTitle like "President" then "P"
-when jobTitle like "%Sale Manager%" then "SM"
-when jobTitle like "%Sales Manager%" then "SM"
-when jobTitle like "Sales Rep" then "SR"
-when jobTitle like "%VP%" then "VP"
-end as jobTitle_abbre from employees order by jobTitle;
+##CODE- 
+          select employeeNumber, firstName, jobTitle,
+          case
+          when jobTitle like "President" then "P"
+          when jobTitle like "%Sale Manager%" then "SM"
+          when jobTitle like "%Sales Manager%" then "SM"
+          when jobTitle like "Sales Rep" then "SR"
+          when jobTitle like "%VP%" then "VP"
+          end as jobTitle_abbre 
+          from employees order by jobTitle;
 
 
 -- For every year, find the minimum amount value from payments table.
-   select year(paymentDate) as Year, min(amount) as MinAmount from payments group by Year order by Year;
 
+## CODE-   select year(paymentDate) as Year, min(amount) as MinAmount from payments group by Year order by Year;
 
--- Inner Join
-select * from movies;
-select * from members;
-select * from members inner join movies on members.movieid = movies.id;
-select first_name, last_name,title from members join movies on movieid = id;
--- Left Join
-select * from members left join movies on id = movieid;
--- Right Join
-select * from members right join movies on movieid = id;
+-- 3)	Show the second highest quantity ordered value for each order number.
+-- Table: Orderdetails
 
--- Full Join
-select * from meals full join drinks;
-select m.mealname, d.drinkname, m.rate + d.rate as Total_cost from drinks as d cross join meals as m;
--- Self Join
-select* from myemp;
-select emp.emp_id, emp.first_name as emp, emp.last_name, mgr.first_name as mgr, mgr.last_name
-from myemp as emp join myemp as mgr on emp.mgr_id = mgr.emp_id;
+## CODE- select ordernumber, quantityOrdered, nth_value (quantityOrdered, 2) over (order by orderNumber desc) as second_highest_quantity from orderdetails;
+
+-- Write a query for Total sales by product wise
+Table- OrderDetails and Products
+
+## CODE- SELECT p.ProductName,p.productLine, SUM(od.Quantityordered * od.PriceEach) AS TotalSales
+         FROM OrderDetails od
+         JOIN Products p ON od.ProductCode = p.ProductCode
+         GROUP BY p.ProductName, p.productLine order by TotalSales desc;
 
 
 
 
 
 
--- SubQueries
-select emp_id, first_name, last_name from myemp where salary = (select max(salary) from myemp);
-select avg(salary) from myemp;
-select * from myemp where salary > (select avg(salary) from myemp) order by salary ;
-select * from myemp as e where salary > (select avg(salary) from myemp where dep_id = e.dep_id);
-select dep_id, avg(salary) from myemp group by dep_id ;
-select * from books where authorid = (select authorid from authors where name like "sidney%");
-select * from members where movieid in (select id from movies where title like "%Safe%");
-
--- CTE
-select avg(salary) as avgsal, min(salary) as minsal, max(salary) as maxsal from myemp;
-with cte as (select avg(salary) as avgsal, min(salary) as minsal, max(salary) as maxsal from myemp) select
-minsal, maxsal from cte;
-
--- Window Function
-select first_name, last_name, dep_id,salary, avg(salary) over (partition by dep_id) as Avgsal from myemp;
-select first_name, last_name, dep_id, mgr_id, salary, avg(salary) over (partition by dep_id, mgr_id) as Avgsal from myemp;
-select first_name, last_name, dep_id,salary, row_number() over(order by dep_id) as RowNumber from myemp;
-select first_name, dep_id, salary, rank() over(order by salary desc) as Rnk, dense_rank() over(order by salary desc) as dense_rnk from myemp;
-select* from (select first_name, last_name, dep_id,salary, rank() over (partition by dep_id order by salary ) as sal_rnk from myemp) as a where sal_rnk=1;
--- Rank
-select * from t;
-select val, rank() over (order by val desc) as rnk from t;
--- Dense_Rank
-select val, dense_rank() over (order by val desc) as rnk from t;
-select * from sales;
-select * from (select sales_employee, fiscal_year, sale, dense_rank() over (partition by fiscal_year order by sale desc) as Rnk from sales) as a where rnk=1 ;
-
--- First_value
-select emp_id, first_name, last_name, first_value(first_name) over (order by salary desc) as Highest_Paid from myemp ;
--- nth_value
-select emp_id, first_name, last_name,salary, nth_value(first_name, 5)over (order by salary desc) as Fifth_Highest_Paid from myemp;
---                                              or
-select* from(select emp_id, first_name, Last_name, salary, rank() over(order by salary desc) as Sal from myemp) as a where Sal<6; 
 
 
 
