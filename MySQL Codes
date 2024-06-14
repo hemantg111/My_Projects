@@ -57,6 +57,20 @@ Table- OrderDetails and Products
          JOIN Products p ON od.ProductCode = p.ProductCode
          GROUP BY p.ProductName, p.productLine order by TotalSales desc;
 
+-- -- 2)	Show total quantities, total quantities in stock, left over quantities for each product and each customer. Sort the data by customer number.
+--      Tables: Customers, Orders, Orderdetails, Products
+desc orders;
+desc employees;
+desc customers;
+desc Products;
+desc orderdetails;
+
+## Code-  
+select p.productCode, p.productName, c.customerName, sum(od.quantityOrdered) as Total_quantity, sum(p.quantityInStock) as TotalQuantity_in_Stock,
+(sum(p.quantityInStock)-sum(od.QuantityOrdered)) as Left_quantity
+from orders o join orderdetails od on o.orderNumber=od.orderNumber join customers c on o.customerNumber=c.customerNumber join products p on p.productCode=od.productCode 
+group by p.productCode, c.customerNumber order by  c.customerNumber;
+
 
 
 
