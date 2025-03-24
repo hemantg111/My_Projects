@@ -1,0 +1,396 @@
+## Day 3
+-- Show customer number, customer name, state and credit limit from customers table for below conditions. Sort the results by highest to lowest values of creditLimit.
+-- State should not contain null values
+-- credit limit should be between 50000 and 100000
+
+select * from customers;
+select customerNumber, customerName, state, creditLimit 
+from customers 
+where  state is not null and creditLimit between 50000 and 100000
+ order by creditLimit desc;
+
+-- Show the unique productline values containing the word cars at the end from products table.
+
+select * from productlines;
+select distinct productLine from productlines where productLine like '%Cars';
+
+## Day 4
+-- Show the orderNumber, status and comments from orders table for shipped status only. If some comments are having null values then show them as “-“.
+
+select orderNumber, status, ifnull(comments, '-') as comments from orders where status= "shipped";
+
+-- Select employee number, first name, job title and job title abbreviation from employees table based on following conditions.
+-- If job title is one among the below conditions, then job title abbreviation column should show below forms.
+-- President then “P”
+-- Sales Manager / Sale Manager then “SM”
+-- Sales Rep then “SR”
+-- Containing VP word then “VP”.
+
+
+select employeeNumber, firstName, jobTitle, 
+case
+when jobtitle like "President" then"P"
+when jobtitle like "%ales Manager%" then "SM"
+when jobtitle like "%sale Manager%" then "SM"
+when jobtitle like "Sales Rep" then "SR"
+when jobtitle like "%VP%" then "VP"
+
+end as jobTitle_abbre from employees;
+
+
+## Day 5
+-- For every year, find the minimum amount value from payments table.
+select* from payments;
+select year(paymentDate) as Year, min(amount) as MinAmount from payments group by Year order by Year;
+
+-- For every year and every quarter, find the unique customers and total orders from orders table. Make sure to show the quarter as Q1,Q2 etc.
+select * from orders;
+
+SELECT CONCAT('Q', QUARTER(orderDate)) AS Quarter,
+YEAR(orderDate) AS Year, COUNT(DISTINCT customerNumber) AS UniqueCustomers,COUNT(orderNumber) AS TotalOrders
+FROM orders GROUP BY Year, Quarter ORDER BY Year, Quarter;
+    
+-- Show the formatted amount in thousands unit (e.g. 500K, 465K etc.) for every month (e.g. Jan, Feb etc.) with filter on total amount as 500000 to 1000000.
+-- Sort the output by total amount in descending mode. [ Refer. Payments Table].
+select* from payments;
+
+SELECT DATE_FORMAT(paymentDate, '%b') AS "Month", CONCAT(round(SUM(amount) / 1000, 0), 'K') AS TotalAmount
+FROM payments GROUP BY Month
+HAVING SUM(amount) BETWEEN 500000 AND 1000000
+ORDER BY SUM(amount) DESC;
+
+## Day 6
+
+-- 1)Create a journey table with following fields and constraints.
+
+	-- Bus_ID (No null values)
+	-- Bus_Name (No null values)
+	-- Source_Station (No null values)
+	-- Destination (No null values)
+	-- Email (must not contain any duplicates)
+
+describe journey;
+create table journey (BusId int Primary key auto_increment, Bus_Name varchar(30) not null, Source_station varchar(30) not null, Destination varchar(30) not null,
+Email varchar(30)); 
+
+-- 2)	Create vendor table with following fields and constraints.
+
+	-- Vendor_ID (Should not contain any duplicates and should not be null)
+	-- Name (No null values)
+	-- Email (must not contain any duplicates)
+	-- Country (If no data is available then it should be shown as “N/A”).
+    
+create table vendor (Vendor_ID int primary key, Name varchar(30) not null, Email varchar(30) unique not null, country varchar(30) default "N/A");
+desc vendor;
+
+-- 3)	Create movies table with following fields and constraints.
+
+	-- Movie_ID (Should not contain any duplicates and should not be null)
+	-- Name (No null values)
+	-- Release_Year (If no data is available then it should be shown as “-”)
+	-- Cast (No null values)
+	-- Gender (Either Male/Female)
+	-- No_of_shows (Must be a positive number)
+    
+CREATE TABLE Movies (Movie_ID INT PRIMARY KEY,Name VARCHAR(255) NOT NULL, Release_Year varchar(4) default '-' not null, Cast VARCHAR(255) NOT NULL,
+ Gender ENUM('Male', 'Female') NOT NULL,No_of_shows INT CHECK (No_of_shows > 0));
+ 
+INSERT INTO Movies VALUES (3, 'Inception', '2010', 'Leonardo DiCaprio', 'Male', 100);
+INSERT INTO Movies VALUES (2,'gf','2011','ab','Male',4);
+
+select* from movies;
+
+-- 4)	Create the following tables. Use auto increment wherever applicable
+
+-- a. Product
+-- ✔	product_id - primary key
+-- ✔	product_name - cannot be null and only unique values are allowed
+-- ✔	description
+-- ✔	supplier_id - foreign key of supplier table
+
+-- b. Suppliers
+-- ✔	supplier_id - primary key
+-- ✔	supplier_name
+-- ✔	location
+
+-- c. Stock
+-- ✔	id - primary key
+-- ✔	product_id - foreign key of product table
+-- ✔	balance_stock.
+
+create table Suppliers (supplier_id int primary key auto_increment, supplier_name varchar(30), location varchar(30));
+    desc Suppliers;
+
+create table Product (Product_ID int primary key auto_increment, Product_name varchar(30) unique not null, description varchar (255), supplier_id int, Foreign key (supplier_id) references Supplier(supplier_id));
+    desc Product;
+    
+create table Stock (Stock_id int primary key auto_increment, product_id int, balance_stock int, foreign key (product_id) references Product(Product_ID));
+    desc stock;
+
+## Day 7
+-- 1) Show employee number, Sales Person (combination of first and last names of employees), unique customers for each employee number 
+--    and sort the data by highest to lowest unique customers.
+--      Tables: Employees, Customers
+desc orders;
+desc employees;
+desc customers;
+desc Products;
+desc orderdetails;
+SELECT e.employeeNumber as emp_Num, concat(e.firstName,' ', e.lastName)as Sales_Person, count(distinct c.customerNumber) as unique_customer 
+from employees as e 
+join customers as c
+on e.employeeNumber= c.salesRepEmployeeNumber 
+group by emp_num, sales_Person order by unique_customer desc;
+
+-- 2)	Show total quantities, total quantities in stock, left over quantities for each product and each customer. Sort the data by customer number.
+--      Tables: Customers, Orders, Orderdetails, Products
+desc orders;
+desc employees;
+desc customers;
+desc Products;
+desc orderdetails;
+
+select p.productCode, p.productName, c.customerName, sum(od.quantityOrdered) as Total_quantity, sum(p.quantityInStock) as TotalQuantity_in_Stock,
+(sum(p.quantityInStock)-sum(od.QuantityOrdered)) as Left_quantity
+from orders o join orderdetails od on o.orderNumber=od.orderNumber join customers c on o.customerNumber=c.customerNumber join products p on p.productCode=od.productCode 
+group by p.productCode, c.customerNumber order by  c.customerNumber;
+
+
+-- 3) Create below tables and fields. (You can add the data as per your wish)
+-- 	Laptop: (Laptop_Name)
+-- 	Colours: (Colour_Name)
+--  Perform cross join between the two tables and find number of rows.
+
+CREATE TABLE Laptop (Laptop_Name VARCHAR(255));
+INSERT INTO Laptop (Laptop_Name) VALUES('Dell'),('HP'),('Lenovo');
+CREATE TABLE Colours (Colour_Name VARCHAR(255));
+INSERT INTO Colours (Colour_Name) VALUES('white'),('silver'),('Black');
+SELECT * 
+FROM Laptop
+CROSS JOIN Colours order by Laptop_Name asc;
+
+-- 4)	Create table project with below fields (EmployeeID, FullName, Gender, ManagerID)
+-- Add below data into it.
+-- INSERT INTO Project VALUES(1, 'Pranaya', 'Male', 3);
+-- INSERT INTO Project VALUES(2, 'Priyanka', 'Female', 1);
+-- INSERT INTO Project VALUES(3, 'Preety', 'Female', NULL);
+-- INSERT INTO Project VALUES(4, 'Anurag', 'Male', 1);
+-- INSERT INTO Project VALUES(5, 'Sambit', 'Male', 1);
+-- INSERT INTO Project VALUES(6, 'Rajesh', 'Male', 3);
+-- INSERT INTO Project VALUES(7, 'Hina', 'Female', 3);
+-- Find out the names of employees and their related managers.
+
+create table project (EmployeeID int primary key Auto_increment, FullName varchar(30), Gender varchar(30), ManagerID int);
+INSERT INTO Project VALUES(1, 'Pranaya', 'Male', 3);
+INSERT INTO Project VALUES(2, 'Priyanka', 'Female', 1);
+INSERT INTO Project VALUES(3, 'Preety', 'Female', NULL);
+INSERT INTO Project VALUES(4, 'Anurag', 'Male', 1);
+INSERT INTO Project VALUES(5, 'Sambit', 'Male', 1);
+INSERT INTO Project VALUES(6, 'Rajesh', 'Male', 3);
+INSERT INTO Project VALUES(7, 'Hina', 'Female', 3);
+select * from project;
+select E.FullName AS Emp_Name , M.FullName AS Manager_Name FROM Project as E left JOIN Project as M ON E.ManagerID = M.EmployeeID order by Manager_Name desc;
+
+## Day 8
+-- Create table facility. Add the below fields into it.
+--	Facility_ID, Name, State, Country
+-- i) Alter the table by adding the primary key and auto increment to Facility_ID column.
+-- ii) Add a new column city after name with data type as varchar which should not accept any null values.
+
+create table facility (facility_ID int, Name varchar(100), State varchar (100), Country varchar (100));
+alter table facility modify facility_ID int primary key auto_increment;
+alter table facility add column city varchar(100) not null after Name;
+desc facility;
+
+## Day-9
+-- Create table university with below fields.
+-- 	ID,	Name
+-- Add the below data into it as it is.
+INSERT INTO University
+VALUES (1, "       Pune          University     "), 
+	   (2, "  Mumbai          University     "),
+	   (3, "     Delhi   University     "),
+	   (4, "Madras University"),
+	   (5, "Nagpur University");
+-- Remove the spaces from everywhere and update the column like Pune University etc.
+
+CREATE TABLE University (ID INT unique,Name VARCHAR(255));
+
+INSERT INTO University (ID, Name)
+ VALUES (1,"       Pune          University     "),
+       (2,  "  Mumbai          University     "),
+       (3, "     Delhi   University     "),
+       (4,  "Madras University"),
+       (5, "Nagpur University");
+       
+UPDATE University SET Name = TRIM(Name);
+set sql_safe_updates = 0;
+       
+select* from university;
+
+
+CREATE VIEW ProductStatus AS
+SELECT 
+    YEAR(OrderDate) AS Year,
+    Concat(COUNT(*)," / ",
+   (round(SUM(quantityOrdered) / (SELECT SUM(quantityOrdered) FROM Orderdetails) * 100)),'%') AS Value
+FROM  orders join orderdetails on orders.orderNumber = orderdetails.orderNumber
+GROUP BY Year order by Value asc;
+
+select* from ProductStatus;
+
+## Day 11
+-- 1)	Create a stored procedure GetCustomerLevel which takes input as customer number and gives the output as either Platinum, Gold or Silver as per below criteria.
+-- (Table: Customers)
+-- Platinum: creditLimit > 100000
+-- 	Gold: creditLimit is between 25000 to 100000
+-- 	Silver: creditLimit < 25000
+
+
+select* from customers;
+select* from payments;
+call GetCustomerLevel(124);
+
+
+-- 2)	Create a stored procedure Get_country_payments which takes in year and country as inputs and gives year wise, country wise total amount as an output. Format the total amount to nearest thousand unit (K)
+-- (Tables: Customers, Payments)
+
+call Get_country_payments(2003,'France');
+
+## Day 12
+
+-- 1)	Calculate year wise, month name wise count of orders and year over year (YoY) percentage change. Format the YoY values in no decimals and show in % sign.
+-- (Table: Orders)
+select* from orders;
+
+
+SELECT YEAR(orderDate) AS Year, MONTHNAME(orderDate) AS Month, COUNT(*) AS TotalOrders,
+CONCAT(ROUND((COUNT(*) - LAG(COUNT(*), 12) OVER (ORDER BY YEAR(orderDate), MONTH(orderDate))) / 
+LAG(COUNT(*), 12) OVER (ORDER BY YEAR(orderDate), MONTH(orderDate)) * 100),'%') AS YoYChange
+FROM orders
+GROUP BY YEAR(OrderDate)
+ORDER BY YEAR(OrderDate);
+
+-- 2)	Create the table emp_udf with below fields.
+-- 	Emp_ID,Name,DOB
+-- INSERT INTO Emp_UDF(Name, DOB) VALUES ("Piyush", "1990-03-30"), ("Aman", "1992-08-15"), ("Meena", "1998-07-28"), ("Ketan", "2000-11-21"), ("Sanjay", "1995-05-21");
+-- Create a user defined function calculate_age which returns the age in years and months (e.g. 30 years 5 months) by accepting DOB column as a parameter.
+
+
+create table emp_udf (Emp_ID int auto_increment primary key, Name Varchar(100),DOB date);
+insert into emp_udf(Name, DOB) values("Piyush", "1990-03-30"),("Aman", "1992-08-15"),
+ ("Meena", "1998-07-28"),("Ketan", "2000-11-21"),("Sanjay", "1995-05-21");
+ 
+ select Emp_ID, Name, DOB, calculate_age(DOB) from emp_udf;
+ 
+ ## Day 13
+ 
+ -- 1)	Display the customer numbers and customer names from customers table who have not placed any orders using subquery
+
+-- Table: Customers, Orders
+
+SELECT CustomerNumber, CustomerName
+FROM Customers WHERE CustomerNumber NOT IN (SELECT CustomerNumber FROM Orders);
+
+-- 2)	Write a full outer join between customers and orders using union and get the customer number, customer name, count of orders for every customer.
+-- Table: Customers, Orders
+
+SELECT c.CustomerNumber, c.CustomerName, IFNULL(o.order_count, 0) AS OrderCount
+FROM Customers c
+LEFT JOIN (SELECT CustomerNumber, COUNT(*) AS order_count FROM Orders GROUP BY CustomerNumber) o ON c.CustomerNumber = o.CustomerNumber
+UNION
+SELECT c.CustomerNumber, c.CustomerName, IFNULL(o.order_count, 0) AS OrderCount FROM Customers c
+RIGHT JOIN (SELECT CustomerNumber, COUNT(*) AS order_count FROM Orders GROUP BY CustomerNumber) o ON c.CustomerNumber = o.CustomerNumber;
+
+-- 3)	Show the second highest quantity ordered value for each order number.
+-- Table: Orderdetails
+
+select ordernumber, quantityOrdered, nth_value (quantityOrdered, 2) over (order by orderNumber desc) as second_highest_quantity from orderdetails;
+
+--               OR(Both gives same result)
+
+SELECT ordernumber, MAX(quantityordered) AS second_highest_quantity
+FROM Orderdetails
+WHERE (ordernumber, quantityordered) NOT IN (SELECT ordernumber, MAX(quantityordered) FROM Orderdetails GROUP BY ordernumber)
+GROUP BY ordernumber;
+
+
+
+-- 4)	For each ordernumber count the number of products and then find the min and max of the values among count of orders.
+-- Table: Orderdetails
+
+select* from orderdetails;
+
+SELECT MIN(ProductCount) AS MinProductCount, MAX(ProductCount) AS MaxProductCount
+FROM (SELECT OrderNumber, COUNT(*) AS ProductCount FROM Orderdetails GROUP BY OrderNumber) AS ProductCounts;
+
+-- 5)	Find out how many product lines are there for which the buy price value is greater than the average of buy price value. Show the output as product line and its count.
+
+SELECT ProductLine, COUNT(*) AS Total
+FROM Products
+WHERE BuyPrice > ( SELECT AVG(BuyPrice) FROM Products)
+GROUP BY productline order by Total desc;
+
+## Day 14
+-- Create the table Emp_EH. Below are its fields.
+--	EmpID (Primary Key)
+--	EmpName
+--	EmailAddress
+-- Create a procedure to accept the values for the columns in Emp_EH. Handle the error using exception handling concept.
+--  Show the message as “Error occurred” in case of anything wrong.
+
+CREATE TABLE Emp_EH (EmpID INT PRIMARY KEY,EmpName VARCHAR(255),EmailAddress VARCHAR(255));
+
+call InsertIntoEmp_EH(2,"raj","raj123");
+select* from Emp_EH;
+
+## Day 15
+
+-- Create the table Emp_BIT. Add below fields in it.
+-- 	Name, Occupation, Working_date, Working_hours
+-- Insert the data as shown in below query.
+
+INSERT INTO Emp_BIT VALUES
+('Robin', 'Scientist', '2020-10-04', 12),  
+('Warner', 'Engineer', '2020-10-04', 10),  
+('Peter', 'Actor', '2020-10-04', 13),  
+('Marco', 'Doctor', '2020-10-04', 14),  
+('Brayden', 'Teacher', '2020-10-04', 12),  
+('Antonio', 'Business', '2020-10-04', 11);  
+
+-- Create before insert trigger to make sure any new value of Working_hours, if it is negative, then it should be inserted as positive.
+-- Create the "Emp_BIT" table
+
+CREATE TABLE Emp_BIT (Name VARCHAR(255),Occupation VARCHAR(255),Working_date DATE,Working_hours INT);
+
+INSERT INTO Emp_BIT (Name, Occupation, Working_date, Working_hours)
+VALUES
+('Robin', 'Scientist', '2020-10-04', 12),
+('Warner', 'Engineer', '2020-10-04', 10),
+('Peter', 'Actor', '2020-10-04', 13),
+('Marco', 'Doctor', '2020-10-04', 14),
+('Brayden', 'Teacher', '2020-10-04', 12),
+('Antonio', 'Business', '2020-10-04', 11);
+
+
+INSERT INTO Emp_BIT (Name, Occupation, Working_date, Working_hours)
+VALUES ('John', 'Engineer', '2020-10-04', -5);
+
+SELECT * FROM Emp_BIT;
+
+## Create a Project In SQL to show in Resume
+
+-- Total sales by product
+SELECT p.ProductName,p.productLine, SUM(od.Quantityordered * od.PriceEach) AS TotalSales
+FROM OrderDetails od
+JOIN Products p ON od.ProductCode = p.ProductCode
+GROUP BY p.ProductName, p.productLine order by TotalSales desc;
+
+
+-- Monthly sales trend
+SELECT p.ProductName,p.productLine,DATE_FORMAT(o.OrderDate, '%Y-%m-01') AS Month, SUM(od.QuantityOrdered * od.PriceEach) AS TotalSales
+FROM Orders o
+JOIN OrderDetails od ON o.OrderNumber = od.OrderNumber
+JOIN Products p ON od.ProductCode = p.ProductCode
+GROUP BY p.ProductName, p.productLine,DATE_FORMAT(o.OrderDate, '%Y-%m-01')
+ORDER BY Month;
